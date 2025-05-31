@@ -1,3 +1,4 @@
+import argparse
 from time import sleep
 from urllib import parse
 import csv
@@ -38,9 +39,7 @@ def write_to_file(data: list, filename="data.csv"):
 
 
 def parse_row(row: webdriver.remote.webelement.WebElement):
-    return {
-        col_name: col_func(row) for col_name, col_func in cols.items()
-    }
+    return {col_name: col_func(row) for col_name, col_func in cols.items()}
 
 
 def load_all_page_rows(driver: webdriver.remote.webdriver.WebDriver):
@@ -115,8 +114,17 @@ def get_data_from_html():
 
 
 def main():
-    all_data = get_data_from_api()
-    write_to_file(all_data, "data_api.csv")
+    parser = argparse.ArgumentParser(description="Fetch cryptocurrency data from CoinMarketCap.")
+    parser.add_argument("--source", choices=["api", "html"], default="api",
+                        help="Source of data: 'api' for API or 'html' for HTML scraping.")
+    parser.add_argument("--output", type=str, default="data.csv",
+                        help="Output file name for the data. Default is 'data.csv'.")
+    args = parser.parse_args()
+    if args.source == "html":
+        all_data = get_data_from_html()
+    else:
+        all_data = get_data_from_api()
+    write_to_file(all_data, filename=args.output)
 
 
 if __name__ == '__main__':
